@@ -18,37 +18,52 @@ class HuffmanEncoder:
         self.file_name = ""
         self.reference = dict()
         self.total_count = 0
+        self.out_file = None
+        self.tree = []
 
     def process(self):
         self.file_name = self.input_file_name()
-        self.read_file(self.file_name)
+        self.read_file(self.file_name, self.dictionary.update, self.update_total_count)
         self.dictionary = self.dictionary.most_common()
         self.print_frequency()
         self.root = self.build_huffman_tree()
         if self.root:
             self.build_huffman_reference()
+        else:
+            print("ERROR: the tree root is still null after building the tree")
+        self.out_file = open(self.file_name + "_encoded", 'w')
+        if self.out_file and self.tree:
+            self.out_file.write(" ".join(self.tree))
+            self.out_file.write("\n")
+            self.read_file(self.file_name, self.translate_write_file)
+        else:
+            print("ERROR: opening encoding out file failed")
 
     def input_file_name(self):
         print("please make sure your target file for encoding is under the same directory with this script")
         return input("File Name：")
 
-    def read_file(self, file_name):
+    def update_total_count(self, count):
+        self.total_count += count
+
+    def read_file(self, file_name, execute, execute1=None):
         try:
             file = open(file_name, 'rb')
-            self.total_count = 0
             temp = file.read(1024)
             while temp:
-                self.total_count += len(temp)
+                if execute1 is not None:
+                    execute1(len(temp))
+                # self.total_count += len(temp)
                 print(temp)
-                self.dictionary.update(temp)
-                print(list(self.dictionary.elements()))
+                execute(temp)
+                # self.dictionary.update(temp)
                 temp = file.read(1024)
             file.close()
         except FileNotFoundError:
             print("file not found")
             self.input_file_name()
         except PermissionError:
-            print("you don't have the read permisson to this file")
+            print("you don't have the read permission to this file")
             self.input_file_name()
 
     def print_frequency(self):
@@ -75,8 +90,8 @@ class HuffmanEncoder:
             x = tree_node_list.pop()
             y = tree_node_list.pop()
             z = TreeNode(-1, x.frequency + y.frequency)
-            z.left=x
-            z.right=y
+            z.left = x
+            z.right = y
             # insert z into sequenced list
             for t in range(len(tree_node_list)):
                 if tree_node_list[-t - 1].frequency >= z.frequency:
@@ -86,13 +101,13 @@ class HuffmanEncoder:
                 if t == len(tree_node_list) - 1:
                     print("insert combined node to list start")
                     tree_node_list.insert(0, z)
-            if len(tree_node_list)==0:
+            if len(tree_node_list) == 0:
                 print("insert combined node to list start when list empty")
-                tree_node_list.insert(0,z)
+                tree_node_list.insert(0, z)
         if len(tree_node_list) == 1:
             return tree_node_list[0]
         else:
-            print("list length: %i"%len(tree_node_list))
+            print("list length: %i" % len(tree_node_list))
             print("ERROR: byte frequency dictionary is null, probably read problem")
             return None
 
@@ -100,29 +115,23 @@ class HuffmanEncoder:
         path = ""
         cur = self.root
         stack = []
-        visited = set()  # visited nodes
-        while cur is not None:
-            if cur not in visited:
-                visited.add(cur)
-                print("adding %i with path %s to stack"%(cur.data,path))
+        self.tree = []
+        while cur is not None or len(stack) > 0:
+            if cur is not None:
+                self.tree.append(str(cur.data))
                 stack.append([cur, path])
-                if cur.left is not None:
-                    path += "0"
-                    # stack.append(cur.right)
-                    cur = cur.left
-                else:
-                    cur, temp_path = stack.pop()
-                    print("cur.data %s : path %s" % (cur.data, temp_path))
-                    self.reference[cur.data] = temp_path
-                    # path.pop()
-                    try:
-                        cur, path = stack.pop()
-                    except IndexError:
-                        break
+                cur = cur.right
+                path += "1"
             else:
-                if cur.right is not None:
-                    path += "1"
-                    cur = cur.right
+                cur, path = stack.pop()
+                print("cur.data %s : path %s" % (cur.data, path))
+                self.reference[cur.data] = path
+                cur = cur.left
+                path += "0"
+
+    def translate_write_file(self, temp_write):
+        for each in temp_write:
+            self.out_file.write(self.reference[int(each)])
 
     def write_file(self, file_name):
         out_file = open(file_name + "_encoded", 'w')
