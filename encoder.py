@@ -38,6 +38,7 @@ class HuffmanEncoder:
             self.read_file(self.file_name, self.translate_write_file)
         else:
             print("ERROR: opening encoding out file failed")
+        self.out_file.close()
 
     def input_file_name(self):
         print("please make sure your target file for encoding is under the same directory with this script")
@@ -132,10 +133,6 @@ class HuffmanEncoder:
     def translate_write_file(self, temp_write):
         for each in temp_write:
             self.out_file.write(self.reference[int(each)])
-
-    def write_file(self, file_name):
-        out_file = open(file_name + "_encoded", 'w')
-        out_file.write(str(list(self.dictionary.elements())[0]))
 
 
 if __name__ == "__main__":
