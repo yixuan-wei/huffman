@@ -3,7 +3,7 @@ import sys
 
 class TreeNode:
     def __init__(self, letter_byte):
-        self.data = letter_byte
+        self.data = int(letter_byte)
         self.left = None
         self.right = None
 
@@ -18,7 +18,7 @@ class HuffmanDecoder:
 
     def process(self):
         self.input_file_name()
-        self.out_file = open(self.file_name + "_decoded", 'wb')
+        self.out_file = open(self.file_name[:-8], 'wb')
         self.read_file(self.file_name, self.write_file, self.construct_tree)
         self.out_file.close()
         if self.root is None:
@@ -30,7 +30,7 @@ class HuffmanDecoder:
 
     def read_file(self, file_name, execute, execute1):
         try:
-            file = open(file_name, 'rb')
+            file = open(file_name, 'r')
             tree = file.readline().split()
             self.root = execute1(tree)
             print(tree)
@@ -41,7 +41,7 @@ class HuffmanDecoder:
                     print(temp_byte)
                     execute(temp_byte)
                     # self.dictionary.update(temp)
-                    temp_byte += file.read(1024)
+                    temp_byte = file.read(1024)
             file.close()
         except FileNotFoundError:
             self.input_file_name()
@@ -77,9 +77,14 @@ class HuffmanDecoder:
 
     def write_file(self,temp_byte):
         for each in temp_byte:
-            if each==b'0':
+            print(each)
+            if self.temp_pointer.left is None:
+                print(self.temp_pointer.data)
+                self.out_file.write(bytes((self.temp_pointer.data,)))
+                self.temp_pointer = self.root
+            if each=='0': # int.from_bytes(b'0',byteorder='big') == 48
                 self.temp_pointer = self.temp_pointer.left
-            elif each==b'1':
+            elif each=='1': # int.from_bytes(b'1',byteorder='big') == 49
                 self.temp_pointer = self.temp_pointer.right
             else:
                 print("ERROR: the encoded info is broken, decoding will abort")
