@@ -46,11 +46,13 @@ class HuffmanEncoder:
         self.root = self.build_huffman_tree()
         if self.root:
             self.build_huffman_reference()
+            print(self.reference)
         else:
             print("ERROR: the tree root is still null after building the tree")
         # output the encoded content
         if self.out_file and self.tree:
-            self.out_file.write(bytes(" ".join(self.tree) + "\n", encoding="gbk"))
+            # TODO: 把节点改造为空，分隔符改成","，
+            self.out_file.write(bytes(str(self.total_count)+"\n" + " ".join(self.tree) + "\n", encoding="gbk"))
             self.read_file(self.file_name, self.translate_write_file)
         else:
             print("ERROR: opening encoding out file failed")
@@ -71,9 +73,7 @@ class HuffmanEncoder:
             while temp:
                 # accumulate total length of file in bytes
                 if execute1 is not None:
-                    print(len(temp))
                     execute1(len(temp))
-                # print(temp)
                 execute(temp)
                 temp = file.read(1024)
             file.close()
@@ -132,7 +132,7 @@ class HuffmanEncoder:
             return None
 
     def build_huffman_reference(self):
-        path = 0  # huffman code for one node in tree
+        path = ""  # huffman code for one node in tree
         cur = self.root
         stack = []  # save node and corresbonding path
         self.tree = []  # store the tree in traversal post order
@@ -142,19 +142,28 @@ class HuffmanEncoder:
                 self.tree.append(str(cur.data))
                 stack.append([cur, path])
                 cur = cur.right
-                path = 10 * path + 1
+                path += "1"
             else:
                 cur, path = stack.pop()
                 # print("cur.data %s : path %s" % (cur.data, path))
                 self.reference[cur.data] = path
                 cur = cur.left
-                path = 10 * path
+                path += "0"
 
     def translate_write_file(self, temp_write):
+        temp = ""  # for temporary storage of path, every 8 digits of path stored once
         for each in temp_write:
             print(each)
-            # TODO: 二进制编码的路径的合理表示？
-            self.out_file.write(self.reference[each])
+            if len(temp) > 8:
+                self.out_file.write(bytes((int(temp[:8], 2),)))
+                temp = temp[8:]
+            temp += self.reference[each]
+        if len(temp) > 0:
+            while len(temp) > 8:
+                self.out_file.write(bytes((int(temp[:8], 2),)))
+                temp = temp[8:]
+            if len(temp) > 0:
+                self.out_file.write(bytes((int(temp.ljust(8, "0"), 2),)))
 
 
 if __name__ == "__main__":

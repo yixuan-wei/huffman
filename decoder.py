@@ -16,6 +16,7 @@ class HuffmanDecoder:
         self.file_name = ""
         self.out_file = None
         self.temp_pointer = None
+        self.total_count=0
 
     def process(self):
         # name of input and output files
@@ -41,7 +42,9 @@ class HuffmanDecoder:
 
     def read_file(self, file_name, execute, execute1):
         try:
-            file = open(file_name, 'r')
+            file = open(file_name, 'rb')
+            # read the total count of bytes in original file
+            self.total_count = int(file.readline().split()[0])
             # read and build huffman tree
             tree = file.readline().split()
             self.root = execute1(tree)
@@ -82,17 +85,25 @@ class HuffmanDecoder:
 
     def write_file(self, temp_byte):
         # travel the tree, temp_pointer for travel marker
-        for each in temp_byte:
-            if self.temp_pointer.left is None:
-                self.out_file.write(bytes((self.temp_pointer.data,)))
-                self.temp_pointer = self.root
-            if each == '0':
-                self.temp_pointer = self.temp_pointer.left
-            elif each == '1':
-                self.temp_pointer = self.temp_pointer.right
-            else:
-                print("ERROR: the encoded info is broken, decoding will abort")
-                sys.exit(1)
+        for each_byte in temp_byte:
+            print("before: ",each_byte)
+            each_byte = bin(each_byte)[2:].zfill(8)
+            print("after: ",each_byte)
+            for each in each_byte:
+                if self.temp_pointer.left is None:
+                    print(self.temp_pointer.data)
+                    self.out_file.write(bytes((self.temp_pointer.data,)))
+                    self.temp_pointer = self.root
+                    self.total_count -= 1
+                    if self.total_count == 0:
+                        return
+                if each == '0':
+                    self.temp_pointer = self.temp_pointer.left
+                elif each == '1':
+                    self.temp_pointer = self.temp_pointer.right
+                else:
+                    print("ERROR: the encoded info is broken, decoding will abort")
+                    sys.exit(1)
 
 
 if __name__ == "__main__":
