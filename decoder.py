@@ -4,7 +4,7 @@ import sys
 
 class TreeNode:
     def __init__(self, letter_byte):
-        self.data = int(letter_byte)
+        self.data = letter_byte
         self.left = None
         self.right = None
 
@@ -46,7 +46,8 @@ class HuffmanDecoder:
             # read the total count of bytes in original file
             self.total_count = int(file.readline().split()[0])
             # read and build huffman tree
-            tree = file.readline().split()
+            tree = file.readline().strip().split(bytes((0,)))
+            print(tree)
             self.root = execute1(tree)
             # read and travel the tree to write the corresbonding output
             if self.root is not None:
@@ -67,7 +68,8 @@ class HuffmanDecoder:
         stack = []
         while len(tree) > 0:
             x = tree.pop()  # read from the end in this traversal post order tree
-            if x.data == -1:
+            print(x.data)
+            if x.data == b"":
                 if len(stack) > 1:
                     y = stack.pop()
                     z = stack.pop()
@@ -92,7 +94,7 @@ class HuffmanDecoder:
             for each in each_byte:
                 if self.temp_pointer.left is None:
                     print(self.temp_pointer.data)
-                    self.out_file.write(bytes((self.temp_pointer.data,)))
+                    self.out_file.write(self.temp_pointer.data)
                     self.temp_pointer = self.root
                     self.total_count -= 1
                     if self.total_count == 0:
