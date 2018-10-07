@@ -51,15 +51,17 @@ class HuffmanEncoder:
             print("ERROR: the tree root is still null after building the tree")
         # output the encoded content
         if self.out_file and self.tree:
-            # TODO: 把节点改造为空，分隔符改成某个不可打印字符
+            # TODO: 把节点改造为空，分隔符改成某个不会出现的字符
             print(self.tree)
-            self.out_file.write(bytes(str(self.total_count)+"\n", encoding="gbk"))
-            for i in range(len(self.tree)-1):
-                if self.tree[i]!=-1:
+            self.out_file.write(bytes(str(self.total_count) + "\n", encoding="gbk"))
+            for i in range(len(self.tree) - 1):
+                if self.tree[i] != -1:
                     self.out_file.write(bytes((int(self.tree[i]),)))
-                self.out_file.write(bytes((0,)))
-            self.out_file.write(bytes((int(self.tree[len(self.tree)-1]),)))
-            self.out_file.write(bytes("\n",encoding="gbk"))
+                else:
+                    self.out_file.write(bytes('-1',encoding='gbk'))
+                self.out_file.write(bytes(',',encoding='gbk'))
+            self.out_file.write(bytes((int(self.tree[len(self.tree) - 1]),)))
+            self.out_file.write(bytes("\n\n", encoding="gbk"))
             self.read_file(self.file_name, self.translate_write_file)
         else:
             print("ERROR: opening encoding out file failed")
@@ -141,7 +143,7 @@ class HuffmanEncoder:
     def build_huffman_reference(self):
         path = ""  # huffman code for one node in tree
         cur = self.root
-        stack = []  # save node and corresbonding path
+        stack = []  # save node and corresponding path
         self.tree = []  # store the tree in traversal post order
         # traversal post order to travel the huffman tree to calculate path
         while cur is not None or len(stack) > 0:

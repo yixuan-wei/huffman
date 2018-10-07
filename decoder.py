@@ -16,7 +16,7 @@ class HuffmanDecoder:
         self.file_name = ""
         self.out_file = None
         self.temp_pointer = None
-        self.total_count=0
+        self.total_count = 0
 
     def process(self):
         # name of input and output files
@@ -46,21 +46,48 @@ class HuffmanDecoder:
             # read the total count of bytes in original file
             self.total_count = int(file.readline().split()[0])
             # read and build huffman tree
-            tree = file.readline().strip().split(bytes((0,)))
-            print(tree)
-            self.root = execute1(tree)
-            # read and travel the tree to write the corresbonding output
+            #tree = file.readline().strip().split(bytes((0,)))
+            tree = file.read(1024)
+            pos = tree.find(b'\n\n')
+            former = 0
+            while pos==-1:
+                tree += file.read(1024)
+                former +=1024
+                pos = tree.find(b'\n\n',former)
+            temp_byte = tree[pos+2:]
+            tree = tree[:pos]
+            # split tree into array
+            i=0
+            tree_array = []
+            while i<len(tree)-1:
+                print(tree[i])
+                if bytes((tree[i],))==b'-' and bytes((tree[i+1],))==b'1' and bytes((tree[i+2],))==b',':
+                    tree_array.append(-1)
+                    i = i+3
+                elif bytes((tree[i+1],))!=b',':
+                    print('ERROR: tree structure is not right, building will abort')
+                    sys.exit(1)
+                else:
+                    tree_array.append(bytes((tree[i],)))
+                    i = i+2
+            tree_array.append(bytes((tree[-1],)))
+            print("TREE: ",tree_array)
+            self.root = execute1(tree_array)
+            # read and travel the tree to write the corresponding output
             if self.root is not None:
                 self.temp_pointer = self.root
-                temp_byte = file.read(1024)
+                print("temp: ",temp_byte)
+                temp_byte += file.read(1024)
+                print("temp: ",temp_byte)
                 while temp_byte:
                     execute(temp_byte)
                     temp_byte = file.read(1024)
+                    print("temp: ",temp_byte)
             file.close()
         except FileNotFoundError:
             self.input_file_name()
         except PermissionError:
-            print("you don't have the read permisson to this file")
+            print("you don't have the read permission to this file")
             self.input_file_name()
 
     def construct_tree(self, tree):
@@ -69,7 +96,7 @@ class HuffmanDecoder:
         while len(tree) > 0:
             x = tree.pop()  # read from the end in this traversal post order tree
             print(x.data)
-            if x.data == b"":
+            if x.data == -1:
                 if len(stack) > 1:
                     y = stack.pop()
                     z = stack.pop()
@@ -88,9 +115,9 @@ class HuffmanDecoder:
     def write_file(self, temp_byte):
         # travel the tree, temp_pointer for travel marker
         for each_byte in temp_byte:
-            print("before: ",each_byte)
+            print("before: ", each_byte)
             each_byte = bin(each_byte)[2:].zfill(8)
-            print("after: ",each_byte)
+            print("after: ", each_byte)
             for each in each_byte:
                 if self.temp_pointer.left is None:
                     print(self.temp_pointer.data)
