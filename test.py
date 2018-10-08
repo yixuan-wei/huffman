@@ -36,11 +36,14 @@ class CompareFile:
 
     def compare_bytes(self, temp1, temp2):
         if len(temp1) != len(temp2):
+            print("length ",len(temp1)," & ",len(temp2)," are different")
             return False
         else:
             for i in range(len(temp1)):
                 if temp1[i] != temp2[i]:
+                    print("on position ",i," ",temp1[i],' & ',temp2[i],' are different')
                     return False
+            print("1024 bytes same")
             return True
 
 

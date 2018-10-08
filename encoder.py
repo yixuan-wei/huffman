@@ -62,7 +62,7 @@ class HuffmanEncoder:
                 self.out_file.write(bytes(',',encoding='gbk'))
             self.out_file.write(bytes((int(self.tree[len(self.tree) - 1]),)))
             self.out_file.write(bytes("\n\n", encoding="gbk"))
-            self.read_file(self.file_name, self.translate_write_file)
+            self.write_file(self.file_name)
         else:
             print("ERROR: opening encoding out file failed")
         self.out_file.close()
@@ -74,15 +74,14 @@ class HuffmanEncoder:
     def update_total_count(self, count):
         self.total_count += count
 
-    def read_file(self, file_name, execute, execute1=None):
+    def read_file(self, file_name, execute, execute1):
         try:
             file = open(file_name, 'rb')
             # read in bytes, every time 1024 bytes
             temp = file.read(1024)
             while temp:
                 # accumulate total length of file in bytes
-                if execute1 is not None:
-                    execute1(len(temp))
+                execute1(len(temp))
                 execute(temp)
                 temp = file.read(1024)
             file.close()
@@ -159,19 +158,39 @@ class HuffmanEncoder:
                 cur = cur.left
                 path += "0"
 
-    def translate_write_file(self, temp_write):
-        temp = ""  # for temporary storage of path, every 8 digits of path stored once
+    def write_file(self, file_name):
+        try:
+            file = open(file_name, 'rb')
+            # read in bytes, every time 1024 bytes
+            temp = file.read(1024)
+            route=""
+            while temp:
+                # accumulate total length of file in bytes
+                route = self.translate_write_file(temp,route)
+                temp = file.read(1024)
+            file.close()
+        except FileNotFoundError:
+            print("file not found")
+            self.input_file_name()
+        except PermissionError:
+            print("you don't have the read permission to this file")
+            self.input_file_name()
+
+    def translate_write_file(self, temp_write, temp_route):
+        # for temporary storage of path, every 8 digits of path stored once
         for each in temp_write:
-            if len(temp) > 8:
-                self.out_file.write(bytes((int(temp[:8], 2),)))
-                temp = temp[8:]
-            temp += self.reference[each]
-        if len(temp) > 0:
-            while len(temp) > 8:
-                self.out_file.write(bytes((int(temp[:8], 2),)))
-                temp = temp[8:]
-            if len(temp) > 0:
-                self.out_file.write(bytes((int(temp.ljust(8, "0"), 2),)))
+            if len(temp_route) > 8:
+                self.out_file.write(bytes((int(temp_route[:8], 2),)))
+                temp_route = temp_route[8:]
+            temp_route += self.reference[each]
+        if len(temp_route) > 0:
+            while len(temp_route) > 8:
+                self.out_file.write(bytes((int(temp_route[:8], 2),)))
+                temp_route = temp_route[8:]
+            if len(temp_route) > 0:
+                return temp_route
+                #self.out_file.write(bytes((int(temp.ljust(8, "0"), 2),)))
+        return ""
 
 
 if __name__ == "__main__":

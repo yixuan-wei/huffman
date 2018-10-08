@@ -72,6 +72,7 @@ class HuffmanDecoder:
                     i = i+2
             tree_array.append(bytes((tree[-1],)))
             print("TREE: ",tree_array)
+            input("wait for your instruction")
             self.root = execute1(tree_array)
             # read and travel the tree to write the corresponding output
             if self.root is not None:
@@ -81,6 +82,7 @@ class HuffmanDecoder:
                 print("temp: ",temp_byte)
                 while temp_byte:
                     execute(temp_byte)
+                    input("1024bytes processed")
                     temp_byte = file.read(1024)
                     print("temp: ",temp_byte)
             file.close()
