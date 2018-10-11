@@ -1,3 +1,11 @@
+'''
+Byte Comparer for 2 files
+Requirement: python3
+execution order sample: 
+    python3 test.py test.txt test_out.txt
+Author: Yixuan Wei
+2018.10.11
+'''
 import sys
 import os
 

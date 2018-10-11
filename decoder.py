@@ -1,3 +1,13 @@
+'''
+Huffman Decoder
+Requirement: python3
+execution order sample: 
+    python3 decoder.py test.txt_encoded test.txt   (source:test.txt_encoded, output:test.txt)
+    python3 decoder.py test.txt_encoded (source:test.txt_encoded, output:./test.txt_encoded_decoded)
+    python3 decoder.py (source:to-be-input, output:./to-be-input_decoded)
+Author: Yixuan Wei
+2018.10.11
+'''
 import os
 import sys
 
@@ -31,6 +41,7 @@ class HuffmanDecoder:
             self.out_file = open(sys.argv[2], 'wb')
         # construct tree, then read input and write into output
         self.read_file(self.file_name, self.write_file, self.construct_tree)
+        print("File decoding finished")
         self.out_file.close()
         # if tree constructed unsuccessfully, delete the output file
         if self.root is None:
@@ -45,8 +56,10 @@ class HuffmanDecoder:
             file = open(file_name, 'rb')
             # read the total count of bytes in original file
             self.total_count = int(file.readline().split()[0])
+            total = self.total_count
+            print("Total ",self.total_count," bytes")
             # read and build huffman tree
-            #tree = file.readline().strip().split(bytes((0,)))
+            print("Reading tree data")
             tree = file.read(1024)
             pos = tree.find(b'\n\n')
             former = 0
@@ -60,7 +73,6 @@ class HuffmanDecoder:
             i=0
             tree_array = []
             while i<len(tree)-1:
-                print(tree[i])
                 if bytes((tree[i],))==b'-' and bytes((tree[i+1],))==b'1' and bytes((tree[i+2],))==b',':
                     tree_array.append(-1)
                     i = i+3
@@ -72,19 +84,18 @@ class HuffmanDecoder:
                     i = i+2
             tree_array.append(bytes((tree[-1],)))
             print("TREE: ",tree_array)
-            input("wait for your instruction")
             self.root = execute1(tree_array)
             # read and travel the tree to write the corresponding output
+            print("Translating file")
             if self.root is not None:
                 self.temp_pointer = self.root
-                print("temp: ",temp_byte)
+                temp_count = 0
                 temp_byte += file.read(1024)
-                print("temp: ",temp_byte)
                 while temp_byte:
+                    temp_count+=len(temp_byte)
                     execute(temp_byte)
-                    input("1024bytes processed")
+                    print("File processed ",int(temp_count/total*100),"%")
                     temp_byte = file.read(1024)
-                    print("temp: ",temp_byte)
             file.close()
         except FileNotFoundError:
             self.input_file_name()
@@ -93,11 +104,11 @@ class HuffmanDecoder:
             self.input_file_name()
 
     def construct_tree(self, tree):
+        print("Constructing huffman tree")
         tree = [TreeNode(each) for each in tree]
         stack = []
         while len(tree) > 0:
             x = tree.pop()  # read from the end in this traversal post order tree
-            print(x.data)
             if x.data == -1:
                 if len(stack) > 1:
                     y = stack.pop()
@@ -117,12 +128,10 @@ class HuffmanDecoder:
     def write_file(self, temp_byte):
         # travel the tree, temp_pointer for travel marker
         for each_byte in temp_byte:
-            print("before: ", each_byte)
             each_byte = bin(each_byte)[2:].zfill(8)
-            print("after: ", each_byte)
             for each in each_byte:
                 if self.temp_pointer.left is None:
-                    print(self.temp_pointer.data)
+                    # print("writing ",self.temp_pointer.data)
                     self.out_file.write(self.temp_pointer.data)
                     self.temp_pointer = self.root
                     self.total_count -= 1

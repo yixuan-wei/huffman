@@ -1,8 +1,17 @@
+'''
+Huffman Encoder
+Requirement: python3, matplotlib(not necessary)
+execution order sample: 
+    python3 encoder.py test.txt test.txt_encoded   (source:test.txt, output:test.txt_encoded)
+    python3 encoder.py test.txt (source:test.txt, output:./test.txt_encoded)
+    python3 encoder.py (source:to-be-input, output:./to-be-input_encoded)
+Author: Yixuan Wei
+2018.10.11
+'''
 from collections import Counter
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import sys
-import struct
 
 
 class TreeNode:
@@ -41,18 +50,18 @@ class HuffmanEncoder:
         self.read_file(self.file_name, self.dictionary.update, self.update_total_count)
         self.dictionary = self.dictionary.most_common()
         print("frequency list: ", self.dictionary)
-        self.print_frequency()
+        if plt:
+            self.print_frequency()
         # build huffman tree and references
         self.root = self.build_huffman_tree()
         if self.root:
             self.build_huffman_reference()
-            print(self.reference)
         else:
             print("ERROR: the tree root is still null after building the tree")
         # output the encoded content
         if self.out_file and self.tree:
-            # TODO: 把节点改造为空，分隔符改成某个不会出现的字符
-            print(self.tree)
+            # non-leaf nodes stored as '-1'，between each node is the symble ',', tree ended with '\n\n'
+            print("Writing into file")
             self.out_file.write(bytes(str(self.total_count) + "\n", encoding="gbk"))
             for i in range(len(self.tree) - 1):
                 if self.tree[i] != -1:
@@ -65,6 +74,7 @@ class HuffmanEncoder:
             self.write_file(self.file_name)
         else:
             print("ERROR: opening encoding out file failed")
+        print("File Encoding finished")
         self.out_file.close()
 
     def input_file_name(self):
@@ -163,10 +173,13 @@ class HuffmanEncoder:
             file = open(file_name, 'rb')
             # read in bytes, every time 1024 bytes
             temp = file.read(1024)
-            route=""
+            temp_count = 0
+            route="" # to store path that is not written into file temporarily
             while temp:
-                # accumulate total length of file in bytes
+                # accumulate total length of processed file in bytes
+                temp_count+=len(temp)
                 route = self.translate_write_file(temp,route)
+                print("File processed ",int(temp_count/self.total_count*100),"%")
                 temp = file.read(1024)
             if route:
                 self.out_file.write(bytes((int(route.ljust(8,"0"),2),)))
@@ -191,7 +204,6 @@ class HuffmanEncoder:
                 temp_route = temp_route[8:]
             if len(temp_route) > 0:
                 return temp_route
-                #self.out_file.write(bytes((int(temp.ljust(8, "0"), 2),)))
         return ""
 
 
