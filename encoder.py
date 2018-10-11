@@ -168,6 +168,8 @@ class HuffmanEncoder:
                 # accumulate total length of file in bytes
                 route = self.translate_write_file(temp,route)
                 temp = file.read(1024)
+            if route:
+                self.out_file.write(bytes((int(route.ljust(8,"0"),2),)))
             file.close()
         except FileNotFoundError:
             print("file not found")
