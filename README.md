@@ -1,7 +1,8 @@
 # Huffman Encoder and Decoder
 This is a tool written for encoding and decoding a file with huffman algorithm, under the requirement of programming portfolio
- assignments by SMU Guildhall 2018 Graduation admission.
- 
+ assignments by SMU Guildhall 2018 Graduation admission.<br>
+**GitHub**: https://github.com/yixuan-wei/huffman
+
 The explanations for each file are below: 
 * encoder.py: encode a file.
 * decoder.py: decode a file that was encoded by encoder.py.
