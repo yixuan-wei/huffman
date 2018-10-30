@@ -1,4 +1,6 @@
 # Huffman Encoder and Decoder
+**Author**: Yixuan Wei<br>
+**FinishDate**: 2018/10/30
 This is a tool written for encoding and decoding a file with huffman algorithm, under the requirement of programming portfolio
  assignments by SMU Guildhall 2018 Graduation admission.<br>
 **GitHub**: https://github.com/yixuan-wei/huffman
